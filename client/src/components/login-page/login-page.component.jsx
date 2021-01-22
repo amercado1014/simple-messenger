@@ -57,7 +57,7 @@ const LoginPage = () => {
         />
         <Button
           className={classes.submitBtn}
-          href={`/chat?name=${name.trim()}&room=${room.trim()}`}
+          href={`/simple-messenger?name=${name.trim()}&room=${room.trim()}`}
           disabled={!name || !room}
           fullWidth
           variant="contained"
