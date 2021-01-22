@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import io from 'socket.io-client';
+import queryString from 'query-string';
 import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import AppBar from '@material-ui/core/AppBar';
@@ -51,15 +53,60 @@ const useStyles = makeStyles({
   }
 });
 
-const Messenger = () => {
+let socket;
+
+const Messenger = ({ location }) => {
   const classes = useStyles();
+
+  const [name, setName] = useState('');
+  const [room, setRoom] = useState('');
+  const [messages, setMessages] = useState([]);
+  const [message, setMessage] = useState('');
+  const [users, setUsers] = useState([]);
+
+  const url = 'localhost:5000';
+
+  useEffect(() => {
+    const name = queryString.parse(location.search).name;
+    const room = queryString.parse(location.search).room;
+
+    setName(name);
+    setRoom(room);
+
+    socket = io(url);
+    socket.emit('joinRoom', { name, room });
+
+    return () => {
+      socket.emit('disconnect');
+      socket.off();
+    };
+  }, [url, location.search]);
+
+  useEffect(() => {
+    socket.on('message', message => {
+      setMessages([...messages, message]);
+    });
+
+    socket.on('roomUsers', ({ users }) => {
+      setUsers(users);
+    });
+  }, [messages, users]);
+
+  const onendChatMessage = e => {
+    e.preventDefault();
+
+    if (message) {
+      socket.emit('chatMessage', message);
+      setMessage('');
+    }
+  };
 
   return (
     <Container className={classes.container} component="main" maxWidth="lg">
       <AppBar position="absolute" color="default" className={classes.appBar}>
         <Toolbar>
           <Typography className={classes.title} variant="h6" color="inherit" noWrap>
-            Room Name:
+            Room Name: {room}
           </Typography>
           <IconButton href="/" color="inherit">
             <CancelIcon />
@@ -75,57 +122,59 @@ const Messenger = () => {
       >
         <Grid item xs={3} className={classes.userSection}>
           <List>
-            <ListItem key="1">
-              <ListItemText primary="Adin"></ListItemText>
+            <ListItem>
+              <Typography className={classes.title} variant="h6" color="inherit" noWrap>
+                Users:
+              </Typography>
             </ListItem>
-            <ListItem key="2">
-              <ListItemText primary="Adilyn"></ListItemText>
-            </ListItem>
-            <ListItem key="3">
-              <ListItemText primary="Hannah"></ListItemText>
-            </ListItem>
+            {users.map((user, index) => (
+              <ListItem key={index}>
+                <ListItemText primary={user.name}></ListItemText>
+              </ListItem>
+            ))}
           </List>
         </Grid>
         <Grid item xs={9}>
           <List className={classes.messageList}>
-            <ListItem key="1">
-              <Grid container>
-                <Grid item xs={12}>
-                  <ListItemText primary="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labor"></ListItemText>
+            {messages.map((message, index) => (
+              <ListItem key={index}>
+                <Grid container>
+                  <Grid item xs={12}>
+                    <ListItemText
+                      align={name === message.name ? 'right' : ''}
+                      primary={message.text}
+                    ></ListItemText>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <ListItemText
+                      align={name === message.name ? 'right' : ''}
+                      secondary={`${message.time} - ${message.name}`}
+                    ></ListItemText>
+                  </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                  <ListItemText secondary="756pm - Adin"></ListItemText>
-                </Grid>
-              </Grid>
-            </ListItem>
-            <ListItem key="2">
-              <Grid container>
-                <Grid item xs={12}>
-                  <ListItemText primary="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labor"></ListItemText>
-                </Grid>
-                <Grid item xs={12}>
-                  <ListItemText secondary="756pm - Adin"></ListItemText>
-                </Grid>
-              </Grid>
-            </ListItem>
-            <ListItem key="3">
-              <Grid container>
-                <Grid item xs={12}>
-                  <ListItemText primary="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labor"></ListItemText>
-                </Grid>
-                <Grid item xs={12}>
-                  <ListItemText secondary="756pm - Adin"></ListItemText>
-                </Grid>
-              </Grid>
-            </ListItem>
+              </ListItem>
+            ))}
           </List>
           <Divider />
-          <Grid container component="form" spacing={1} className={classes.inputContainer}>
+          <Grid
+            container
+            onSubmit={e => onendChatMessage(e)}
+            component="form"
+            spacing={1}
+            className={classes.inputContainer}
+          >
             <Grid item xs={10}>
-              <TextField label="Enter Message" autoFocus name="message" fullWidth />
+              <TextField
+                onChange={e => setMessage(e.target.value)}
+                value={message}
+                label="Enter Message"
+                autoFocus
+                name="message"
+                fullWidth
+              />
             </Grid>
             <Grid item xs={2} align="right">
-              <Fab type="submit" className={classes.submitBtn} color="primary">
+              <Fab type="submit" className={classes.submitBtn} disabled={!message} color="primary">
                 <SendIcon />
               </Fab>
             </Grid>
