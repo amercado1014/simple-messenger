@@ -15,7 +15,7 @@
 
 5. Run `yarn start`
 
-6. Visit localhost:3000 in your browser for each user to join a messeging room
+6. Visit localhost:3000 in your browser for each user to join a messaging room
 
 ## Screenshot
 
