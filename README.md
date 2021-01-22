@@ -19,4 +19,4 @@
 
 ## Screenshot
 
-![Screenshot1](./clent/public/simple-messenger.png)
+![Screenshot1](./client/public/simple-messenger.png)
