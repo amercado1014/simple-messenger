@@ -22,7 +22,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const Join = () => {
+const LoginPage = () => {
   const classes = useStyles();
 
   const [name, setName] = useState('');
@@ -31,7 +31,7 @@ const Join = () => {
   return (
     <Container className={classes.container} component="main" maxWidth="xs">
       <Typography color="primary" component="h1" variant="h5">
-        Simple Messenger
+        SIMPLE MESSENGER
       </Typography>
       <form className={classes.form} noValidate>
         <TextField
@@ -63,11 +63,11 @@ const Join = () => {
           variant="contained"
           color="primary"
         >
-          Join Rooms
+          Join Room
         </Button>
       </form>
     </Container>
   );
 };
 
-export default Join;
+export default LoginPage;
