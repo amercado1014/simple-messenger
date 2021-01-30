@@ -84,15 +84,15 @@ const Messenger = ({ location }) => {
 
   useEffect(() => {
     socket.on('message', message => {
-      setMessages([...messages, message]);
+      setMessages(messages => [...messages, message]);
     });
 
     socket.on('roomUsers', ({ users }) => {
       setUsers(users);
     });
-  }, [messages, users]);
+  }, []);
 
-  const onendChatMessage = e => {
+  const onSendChatMessage = e => {
     e.preventDefault();
 
     if (message) {
@@ -158,7 +158,7 @@ const Messenger = ({ location }) => {
           <Divider />
           <Grid
             container
-            onSubmit={e => onendChatMessage(e)}
+            onSubmit={e => onSendChatMessage(e)}
             component="form"
             spacing={1}
             className={classes.inputContainer}
