@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const router = require('./router');
 const { formatMessage } = require('./utils/format-message');
 const { addUser, getUser, removeUser, getRoomUsers } = require('./utils/handle-users');
 
@@ -10,6 +11,8 @@ const io = require('socket.io')(httpServer, {
     origin: 'http://localhost:3000'
   }
 });
+
+app.use(router);
 
 const PORT = process.env.PORT || 5000;
 const adminName = 'Simple Admin';
